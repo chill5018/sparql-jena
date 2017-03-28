@@ -6,6 +6,7 @@
 import java.io.InputStream;
 import java.util.Scanner;
 
+import org.apache.jena.base.Sys;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
@@ -91,7 +92,7 @@ public class DataFusion {
 
 		// TASK 5: INSERT BELOW THE STATEMENTS FOR THIS TASK
         // FOR INSTANCE: Resource purchase1 = camera1.addProperty(model1.getProperty("Enter URI here..."), model1.getResource("Enter URI here....));
-		String purchase_name_space = "https://schema.org/BuyAction";
+		String purchase_name_space = "https://schema.org/BuyAction#";
 
 		Resource purchase1 = camera1.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dig.csail.mit.edu/2008/webdav/timbl/foaf.rdf#edd"));
 
@@ -186,13 +187,16 @@ public class DataFusion {
 			case 5:
 				System.out.println("Task 4 selected....");
 
+				// We only want the Digital and SLR cameras not window so we need to filter the results
+				// using a REGEX OR 'Digital|SLR'
+
 				String queryStr5 =	"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n" +
 									"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
 									"PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" +
 									"PREFIX camera: <http://www.xfront.com/owl/ontologies/camera/#> \n"+
 
-									"SELECT ?cameras ?class WHERE {  ?cameras rdf:type  ?class ." +
-									"        FILTER(regex (str(?class), 'camera' , 'i')) }" ;
+									"SELECT ?cameras ?class WHERE { ?cameras rdf:type  ?class . " +
+									"                       FILTER(regex (str(?class), 'Digital|SLR' , 'i')) . }" ;
 
 
 
@@ -201,10 +205,24 @@ public class DataFusion {
 			
 			case 6:
 				System.out.println("Task 5 selected....");
+				union.write(System.out);
 				break;
 				
 			case 7:
 				System.out.println("Task 6 selected....");
+
+				String queryStr6 =	"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n" +
+						"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
+						"PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" +
+						"PREFIX camera: <http://www.xfront.com/owl/ontologies/camera/#> \n"+
+						"PREFIX j.0: <http://www.schema.org/BuyAction#> \n"+
+
+						"SELECT ?cameras ?BuyAction ?person WHERE {  ?cameras ?BuyAction  ?person ." +
+						"  							FILTER(regex (str(?BuyAction), 'Agent', 'i')) .  }" ;
+
+				executeQuery(queryStr6, union);
+
+
 				break;	
 				
 			case 8:
