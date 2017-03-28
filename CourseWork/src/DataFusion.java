@@ -91,9 +91,30 @@ public class DataFusion {
 
 		// TASK 5: INSERT BELOW THE STATEMENTS FOR THIS TASK
         // FOR INSTANCE: Resource purchase1 = camera1.addProperty(model1.getProperty("Enter URI here..."), model1.getResource("Enter URI here....));
-        
+		String purchase_name_space = "https://schema.org/BuyAction";
+
+		Resource purchase1 = camera1.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dig.csail.mit.edu/2008/webdav/timbl/foaf.rdf#edd"));
+
+		Resource purchase2 = camera2.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://hometown.aol.com/chbussler/foaf/chbussler.foaf#me"));
+
+		Resource purchase3 = camera3.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dig.csail.mit.edu/2008/webdav/timbl/foaf.rdf#dj"));
+
+		Resource purchase4 = camera4.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dbpedia.org/resource/John_Seely_Brown"));
+
+		Resource purchase5 = camera5.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dbpedia.org/resource/John_Markoff"));
+
+		Resource purchase6 = camera6.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dbpedia.org/resource/John_Gage"));
+
+		Resource purchase7 = camera7.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dig.csail.mit.edu/2008/webdav/timbl/foaf.rdf#edd"));
+
+		Resource purchase8 = camera8.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dbpedia.org/resource/John_Klensin"));
+
+		Resource purchase9 = camera9.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://dig.csail.mit.edu/2007/wiki/people/RobertHoffmann#RMH"));
+
+		Resource purchase10 = camera10.addProperty(model1.getProperty(purchase_name_space + "Agent"), model1.getResource("http://inamidst.com/sbp/foaf#Sean"));
+
         // OPTIONAL: Validate the merged data model with instances about purchasers....
-        // union.write(System.out);
+         union.write(System.out);
 	
         // Querying the data model including all data vocabularies
         
@@ -106,44 +127,12 @@ public class DataFusion {
 														"\n5. Query (Task 4)" + "\n6. Query (Task 5)" + "\n7. Query (Task 6)" +
 														"\n8. Query (Task 7)" + "\n9. Query (Task 8)" + "\n10. Query (Task 9)");
 			choice = scan.nextInt();
-
-			Query query = QueryFactory.create();
 			
 			switch (choice) {
         
 			case 1:
 //				https://jena.apache.org/documentation/ontology/#general-concepts
-//				Resource r = camera1.getResource( myNS + "DigitalCamera" );
-//				OntClass cls = camera1.as( OntClass.class );
 
-//				System.out.println("Task 3.1 selected....");
-//				String queryStr1 =	"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n" +
-//									"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
-//									"PREFIX owl: <camera.owl#> \n"+
-//
-//									"SELECT ?class  WHERE { owl:Class rdf:ID \"Camera\" . }";
-
-				// Iterator over model1 == `camera.owl`
-				StmtIterator iter = model1.listStatements();
-
-				// print out the predicate, subject and object of each statement
-				while (iter.hasNext()) {
-					Statement stmt      = iter.nextStatement();  // get next statement
-					Resource  subject   = stmt.getSubject();     // get the subject
-					Property  predicate = stmt.getPredicate();   // get the predicate
-					RDFNode   object    = stmt.getObject();      // get the object
-
-					System.out.print(subject.toString());
-					System.out.print(" " + predicate.toString() + " ");
-					if (object instanceof Resource) {
-//						System.out.print(object.toString());
-					} else {
-						// object is a literal
-//						System.out.print(" \"" + object.toString() + "\"");
-					}
-
-//					System.out.println(" .");
-				}
 				String queryStr1 =	"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n" +
 									"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
 									"PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" +
@@ -152,25 +141,62 @@ public class DataFusion {
 									"SELECT ?class ?subclass  WHERE { ?class rdf:type owl:Class; " +
 									"        			 rdfs:subClassOf ?subclass	. }";
 
-				query = QueryFactory.create(queryStr1);
-//				System.out.println(queryStr1);
+				executeQuery(queryStr1, model1);
 				break;
 		
 			case 2: 
 				System.out.println("Task 3.2 selected....");
 				// http://stackoverflow.com/questions/30672123/sparql-query-to-get-all-classes-that-are-subclass-of-a-property-class
+				String queryStr2 =	"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n" +
+									"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
+									"PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" +
+									"PREFIX camera: <http://www.xfront.com/owl/ontologies/camera/#> \n" +
+
+									"SELECT  ?class WHERE { ?class rdfs:subClassOf camera:PurchaseableItem . }";
+
+				executeQuery(queryStr2, model1);
 				break;
 		
 			case 3: 
 				System.out.println("Task 3.3 selected....");
+				// http://stackoverflow.com/questions/30672123/sparql-query-to-get-all-classes-that-are-subclass-of-a-property-class
+				String queryStr3 =	"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n" +
+									"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
+									"PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" +
+
+									"SELECT ?object  ?domain ?range WHERE { ?object rdf:type owl:ObjectProperty ." +
+															    	"  ?object rdfs:domain ?domain ." +
+																	"  ?object rdfs:range ?range }";
+
+				executeQuery(queryStr3, model1);
 				break;
 		
 			case 4:
 				System.out.println("Task 3.4 selected....");
+				String queryStr4 =	"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n" +
+									"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
+									"PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" +
+
+									"SELECT ?object  ?subPropertyOf WHERE { ?object rdf:type owl:ObjectProperty ." +
+																		  "  ?object rdfs:subPropertyOf ?subPropertyOf }";
+
+				executeQuery(queryStr4, model1);
 				break;
 				
 			case 5:
 				System.out.println("Task 4 selected....");
+
+				String queryStr5 =	"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n" +
+									"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
+									"PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" +
+									"PREFIX camera: <http://www.xfront.com/owl/ontologies/camera/#> \n"+
+
+									"SELECT ?cameras ?class WHERE {  ?cameras rdf:type  ?class ." +
+									"        FILTER(regex (str(?class), 'camera' , 'i')) }" ;
+
+
+
+				executeQuery(queryStr5, union);
 				break;
 			
 			case 6:
@@ -200,25 +226,34 @@ public class DataFusion {
 
 			//TODO Refactor
 
-			// Local execution. --> Remote use sparql
-			try ( QueryExecution qexec = QueryExecutionFactory.create(query, model1) ) {
-				// Set the DBpedia specific timeout.
 
-				// Execute.
-				ResultSet rs = qexec.execSelect();
+
+			System.out.println("Would you like to quit (y/n)? ");
+			input = scan.next().toLowerCase();
+			quit = input.charAt(0);
+		}
+    }
+
+    private static void executeQuery(String query, Model data) {
+		// Local execution. --> Remote use sparqlService
+		try ( QueryExecution qexec = QueryExecutionFactory.create(query, data) ) {
+			// Set the DBpedia specific timeout.
+
+			// Execute.
+			ResultSet rs = qexec.execSelect();
 
 				/* You may also try the following in order to received the query result in more than one format.... */
-				try {
-					ResultSetRewindable results = ResultSetFactory.makeRewindable(rs);
+			try {
+				ResultSetRewindable results = ResultSetFactory.makeRewindable(rs);
 					/*
 					System.out.println("---- XML ----");
 					ResultSetFormatter.outputAsXML(System.out, results);
 					results.reset();
 					*/
 
-					System.out.println("---- Text ----");
-					ResultSetFormatter.out(System.out, results);
-					results.reset();
+				System.out.println("---- Text ----");
+				ResultSetFormatter.out(System.out, results);
+				results.reset();
 
 					/*
 					System.out.println("\n---- CSV ----");
@@ -233,21 +268,17 @@ public class DataFusion {
 					ResultSetFormatter.outputAsJSON(System.out, results);
 					results.reset();
 					*/
-				}
-
-				finally { qexec.close(); }
-
-				// ResultSetFormatter.out(System.out, rs, query);
-
-				// qexec.close();
-
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 
-			System.out.println("Would you like to quit (y/n)? ");
-			input = scan.next().toLowerCase();
-			quit = input.charAt(0);
+			finally { qexec.close(); }
+
+			// ResultSetFormatter.out(System.out, rs, query);
+
+			// qexec.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-    }
+	}
 }
+
