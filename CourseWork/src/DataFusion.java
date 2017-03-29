@@ -142,7 +142,7 @@ public class DataFusion {
 									"SELECT ?class ?subclass  WHERE { ?class rdf:type owl:Class; " +
 									"        			 rdfs:subClassOf ?subclass	. }";
 
-				executeQuery(queryStr1, model1);
+				executeInternalQuery(queryStr1, model1);
 				break;
 		
 			case 2: 
@@ -155,7 +155,7 @@ public class DataFusion {
 
 									"SELECT  ?class WHERE { ?class rdfs:subClassOf camera:PurchaseableItem . }";
 
-				executeQuery(queryStr2, model1);
+				executeInternalQuery(queryStr2, model1);
 				break;
 		
 			case 3: 
@@ -169,7 +169,7 @@ public class DataFusion {
 															    	"  ?object rdfs:domain ?domain ." +
 																	"  ?object rdfs:range ?range }";
 
-				executeQuery(queryStr3, model1);
+				executeInternalQuery(queryStr3, model1);
 				break;
 		
 			case 4:
@@ -181,7 +181,7 @@ public class DataFusion {
 									"SELECT ?object  ?subPropertyOf WHERE { ?object rdf:type owl:ObjectProperty ." +
 																		  "  ?object rdfs:subPropertyOf ?subPropertyOf }";
 
-				executeQuery(queryStr4, model1);
+				executeInternalQuery(queryStr4, model1);
 				break;
 				
 			case 5:
@@ -200,7 +200,7 @@ public class DataFusion {
 
 
 
-				executeQuery(queryStr5, union);
+				executeInternalQuery(queryStr5, union);
 				break;
 			
 			case 6:
@@ -220,17 +220,63 @@ public class DataFusion {
 						"SELECT ?cameras ?BuyAction ?person WHERE {  ?cameras ?BuyAction  ?person ." +
 						"  							FILTER(regex (str(?BuyAction), 'Agent', 'i')) .  }" ;
 
-				executeQuery(queryStr6, union);
+				executeInternalQuery(queryStr6, union);
 
 
 				break;	
 				
 			case 8:
 				System.out.println("Task 7 selected....");
+
+				String queryStr7 = "PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n" +
+						"PREFIX wd: <http://www.wikidata.org/entity/> \n" +
+						"PREFIX bd: <http://www.bigdata.com/rdf#> \n" +
+						"PREFIX wikibase: <http://wikiba.se/ontology#> \n" +
+
+
+						"SELECT ?item ?itemLabel WHERE {\n" +
+						"  ?item wdt:P279 wd:Q1485994.\n" +
+						"  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\". }\n" +
+						" }";
+
+				// Where ?item is subclassOf wikiData:Camera
+				// Show labels in english
+				executeExternalQuery(queryStr7);
 				break;
 				
 			case 9:
 				System.out.println("Task 8 selected....");
+
+				String queryStr8 = "PREFIX entity: <http://www.wikidata.org/entity/>\n" +
+						"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>   \n"+
+						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+						"PREFIX hint: <http://www.bigdata.com/queryHints#>\n " +
+						"PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n" +
+						"PREFIX wikibase: <http://wikiba.se/ontology#> \n" +
+
+						"SELECT ?propUrl ?propLabel ?valUrl ?valLabel ?picture WHERE {\n" +
+						"  hint:Query hint:optimizer \"None\".\n" +
+						"  {\n" +
+						"    BIND(entity:Q42 AS ?valUrl)\n" +
+						"    BIND(\"N/A\" AS ?propUrl)\n" +
+						"    BIND(\"identity\"@en AS ?propLabel)\n" +
+						"  }\n" +
+						"  UNION\n" +
+						"  {\n" +
+						"    entity:Q80 ?propUrl ?valUrl.\n" +
+						"    ?property ?ref ?propUrl.\n" +
+						"    ?property rdf:type wikibase:Property.\n" +
+						"    ?property rdfs:label ?propLabel.\n" +
+						"  }\n" +
+						"  ?valUrl rdfs:label ?valLabel.\n" +
+						"  OPTIONAL { ?valUrl wdt:P18 ?picture. }\n" +
+						"  FILTER((LANG(?valLabel)) = \"en\")\n" +
+						"  FILTER((LANG(?propLabel)) = \"en\")\n" +
+						"}\n" +
+						"ORDER BY ?propUrl ?valUrl\n" +
+						"LIMIT 200";
+
+				executeExternalQuery(queryStr8);
 				break;
 				
 			case 10:
@@ -241,18 +287,14 @@ public class DataFusion {
 				System.out.println("That was not a proper choice.");
 			}
 
-
-			//TODO Refactor
-
-
-
+			
 			System.out.println("Would you like to quit (y/n)? ");
 			input = scan.next().toLowerCase();
 			quit = input.charAt(0);
 		}
     }
 
-    private static void executeQuery(String query, Model data) {
+    private static void executeInternalQuery(String query, Model data) {
 		// Local execution. --> Remote use sparqlService
 		try ( QueryExecution qexec = QueryExecutionFactory.create(query, data) ) {
 			// Set the DBpedia specific timeout.
@@ -260,35 +302,10 @@ public class DataFusion {
 			// Execute.
 			ResultSet rs = qexec.execSelect();
 
+			printQueryResults(rs, qexec);
+
 				/* You may also try the following in order to received the query result in more than one format.... */
-			try {
-				ResultSetRewindable results = ResultSetFactory.makeRewindable(rs);
-					/*
-					System.out.println("---- XML ----");
-					ResultSetFormatter.outputAsXML(System.out, results);
-					results.reset();
-					*/
 
-				System.out.println("---- Text ----");
-				ResultSetFormatter.out(System.out, results);
-				results.reset();
-
-					/*
-					System.out.println("\n---- CSV ----");
-					ResultSetFormatter.outputAsCSV(System.out, results);
-					results.reset();
-
-					System.out.println("\n---- TSV ----");
-					ResultSetFormatter.outputAsTSV(System.out, results);
-					results.reset();
-
-					System.out.println("\n---- JSON ----");
-					ResultSetFormatter.outputAsJSON(System.out, results);
-					results.reset();
-					*/
-			}
-
-			finally { qexec.close(); }
 
 			// ResultSetFormatter.out(System.out, rs, query);
 
@@ -297,6 +314,37 @@ public class DataFusion {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static void executeExternalQuery(String query) {
+		// Remote execution.
+		try ( QueryExecution qexec = QueryExecutionFactory.sparqlService("https://query.wikidata.org/sparql", query) ) {
+			// Set the DBpedia specific timeout.
+			((QueryEngineHTTP)qexec).addParam("timeout", "10000") ;
+
+
+			// Execute.
+			ResultSet rs = qexec.execSelect();
+
+			printQueryResults(rs, qexec);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	private static void printQueryResults(ResultSet rs, QueryExecution qexec) {
+		try {
+			ResultSetRewindable results = ResultSetFactory.makeRewindable(rs);
+
+			System.out.println("---- Text ----");
+			ResultSetFormatter.out(System.out, results);
+			results.reset();
+
+		}
+
+		finally { qexec.close(); }
 	}
 }
 
